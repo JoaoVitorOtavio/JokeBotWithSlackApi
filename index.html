@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>POC</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+
+<body>
+    <input type="text" placeholder="ID" name='id' id='id'>
+    <input type="text" name='message' placeholder="mensagem" id='message'>
+    <button onclick="joinChann()">
+        send
+    </button>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+        async function joinChann() {
+            try {
+                let ID = document.getElementById('id').value;
+                let MESSAGEINPUT= document.getElementById('message').value;
+                let ALL = ID+'@'+MESSAGEINPUT
+                console.log("ID AQUI")
+                console.log(ID)
+                let infoChannelJoin = {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    data: `token=xoxp-716556317062-713936428100-716294888039-12c59f2dd81ff4027e6ad69cd4a086ec&name=${ID}`,
+                    url: 'https://slack.com/api/channels.join'
+                };
+
+                let dataJoinChannel = await axios(infoChannelJoin)
+                console.log("JOIN")
+                console.log(dataJoinChannel)
+
+                let infoInvite = {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    data: `token=xoxp-716556317062-713936428100-716294888039-12c59f2dd81ff4027e6ad69cd4a086ec&channel=${dataJoinChannel.data.channel.id}&user=ULP0W1HA6`,
+                    url: 'https://slack.com/api/channels.invite'
+                };
+
+                const dataInvite = await axios(infoInvite)
+                console.log("INVITE")
+                console.log(dataInvite)
+
+                if(dataInvite.data.error && dataInvite.data.error==="invalid_auth"){
+                    console.log("DEU ERRO DE invalid_auth")
+                    throw new Error("DEU ERRO invalid_auth")
+                }
+
+                let message = {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    data: `token=xoxb-716556317062-703030051346-MqRpsJYOfX4XxwCOg4hzoWI4&channel=${dataJoinChannel.data.channel.id}&text=${ALL}`,
+                    url: 'https://slack.com/api/chat.meMessage'
+                };
+
+                const dataMessage = await axios(message)
+                console.log("message")
+                console.log(dataMessage)
+
+
+            } catch (err) {
+                console.log("CAIU NO CATCH DEU ERRO")
+                console.log(err)
+            }
+        }
+    </script>
+</body>
+
+</html>
